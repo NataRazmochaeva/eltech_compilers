@@ -22,6 +22,10 @@ type instr =
 | Push of opnd
 | Pop  of opnd
 | Call of string
+| Lbl  of string
+| Jnz  of string
+| Jz   of string
+| Jmp  of string
 | Setl
 | Setle
 | Setg
@@ -54,6 +58,11 @@ let to_string buf code =
       | Push x     -> Printf.sprintf "pushl\t%s"      (opnd x)
       | Pop  x     -> Printf.sprintf "popl\t%s"       (opnd x)
       | Call x     -> Printf.sprintf "call\t%s"       x
+      
+      | Lbl l      -> Printf.sprintf "%s:"			  l
+      | Jnz l      -> Printf.sprintf "jnz\t%s"		  l
+      | Jz l       -> Printf.sprintf "jz\t%s"		  l
+      | Jmp l      -> Printf.sprintf "jmp\t%s"		  l
       
       | Cmp (x, y) -> Printf.sprintf "cmp\t%s,\t%s"   (opnd x) (opnd y)
       | Setl       -> "setl\t%al"
@@ -112,6 +121,16 @@ let rec sint env prg sstack =
             env, [Call "lread"], [eax]
         | WRITE ->
             env, [Push (R 1); Call "lwrite"; Pop (R 1)], [] 
+        | LBL l -> 
+            env, [Lbl l], sstack
+        | JNZ l ->
+            let s :: sstack' = sstack in
+            env, [Cmp (L 0, s); Jnz l], sstack'
+        | JZ l  -> 
+            let s :: sstack' = sstack in
+            env, [Cmp (L 0, s); Jz l], sstack'           
+        | JMP l ->  
+             env, [Jmp l], sstack 
         | _ ->
             let x::(y::_ as sstack') = sstack in
             (fun op ->
