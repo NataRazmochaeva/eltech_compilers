@@ -6,24 +6,32 @@ module Expr =
 
     open Expr
 
+    let of_binop op =
+		let bti = function true -> 1 | _ -> 0 in
+		let (&) f g = fun x y -> f (g x y) in 
+		List.assoc op
+			[ "+", ( + );
+			  "-", ( - );
+			  "*", ( * );
+			  "/", ( / );
+			  "%", ( mod );
+			  "<",  bti & (<);
+			  "<=", bti & (<=);
+			  ">",  bti & (>);
+			  ">=", bti & (>=);
+			  "==", bti & (==);
+			  "!=", bti & (<>);
+			  "&&", (fun x y -> if x == 1 && y == 1 then 1 else 0);
+			  "||", (fun x y -> if x <> 0 && y <> 0 then 1 else 0);
+			]
+
+
     let rec eval expr st = 
       let eval' e = eval e st in
       match expr with
       | Var   x     -> st x
       | Const z     -> z
-      | Binop ("+", x, y)   -> eval' x + eval' y
-      | Binop ("-", x, y)   -> eval' x - eval' y
-      | Binop ("*", x, y)   -> eval' x * eval' y
-      | Binop ("/", x, y)   -> eval' x / eval' y
-      | Binop ("%", x, y)   -> (eval' x) mod   (eval' y)
-      | Binop ("<", x, y)   -> if (eval' x) <  (eval' y)  then 1 else 0
-      | Binop ("<=", x, y)  -> if (eval' x) <= (eval' y) then 1 else 0
-      | Binop (">", x, y)   -> if (eval' x) >  (eval' y)  then 1 else 0
-      | Binop (">=", x, y)  -> if (eval' x) >= (eval' y) then 1 else 0
-      | Binop ("==", x, y)  -> if (eval' x) == (eval' y) then 1 else 0
-      | Binop ("!=", x, y)  -> if (eval' x) <> (eval' y) then 1 else 0
-      | Binop ("&&", x, y)  -> if ((eval' x) <> 0) && ((eval' y) <> 0) then 1 else 0
-      | Binop ("!!", x, y)  -> if ((eval' x) <> 0) || ((eval' y) <> 0) then 1 else 0
+      | Binop (op, x, y)   -> of_binop op (eval' x) (eval' y)
 
   end
 
