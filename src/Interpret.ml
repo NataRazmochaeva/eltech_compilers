@@ -21,8 +21,8 @@ module Expr =
 			  ">=", bti & (>=);
 			  "==", bti & (==);
 			  "!=", bti & (<>);
-			  "&&", (fun x y -> if x == 1 && y == 1 then 1 else 0);
-			  "||", (fun x y -> if x <> 0 && y <> 0 then 1 else 0);
+			  "&&", (fun x y -> if x <> 0 && y <> 0 then 1 else 0);
+			  "!!", (fun x y -> if x <> 0 || y <> 0 then 1 else 0)
 			]
 
 
